@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from pydantic_settings import SettingsConfigDict
 
 
 class UserPostIn(BaseModel):
@@ -7,6 +8,7 @@ class UserPostIn(BaseModel):
 
 class UserPost(UserPostIn):
     id: int
+    model_config = SettingsConfigDict(from_attributes=True)
 
 
 class CommentIn(BaseModel):
@@ -16,6 +18,7 @@ class CommentIn(BaseModel):
 
 class Comment(CommentIn):
     id: int
+    model_config = SettingsConfigDict(from_attributes=True)
 
 
 class UserPostWithComments(BaseModel):
