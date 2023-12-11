@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 ALGORITHM = "HS256"
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-EXPIRE_MINUTES = 30
 pwd_context = CryptContext(schemes=["bcrypt"])
 
 
@@ -38,9 +37,10 @@ def create_access_token(email: str):
     logger.debug("Creating access token", extra={"email": email})
 
     expire = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(
-        minutes=EXPIRE_MINUTES
+        minutes=access_token_expire_minutes()
     )
-    jwt_data = {"sub": email, "exp": access_token_expire_minutes, "type": "access"}
+    jwt_data = {"sub": email, "exp": expire, "type": "access"}
+
     encoded_jwt = jwt.encode(jwt_data, config.SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
@@ -49,11 +49,11 @@ def create_confirmation_token(email: str):
     logger.debug("Creating confirmation token", extra={"email": email})
 
     expire = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(
-        minutes=EXPIRE_MINUTES
+        minutes=confirmation_token_expire_minutes()
     )
     jwt_data = {
         "sub": email,
-        "exp": confirmation_token_expire_minutes,
+        "exp": expire,
         "type": "confirmation",
     }
     encoded_jwt = jwt.encode(jwt_data, config.SECRET_KEY, algorithm=ALGORITHM)
@@ -66,7 +66,7 @@ def get_subject_for_token_type(
     try:
         payload = jwt.decode(token, key=config.SECRET_KEY, algorithms=[ALGORITHM])
     except ExpiredSignatureError as e:
-        raise credentials_exception("Token has expire") from e
+        raise credentials_exception("Token has expired") from e
 
     except JWTError as e:
         raise credentials_exception("Invalid token") from e
@@ -106,6 +106,8 @@ async def authenticate_user(email: str, password: str):
         raise credentials_exception("Invalid email or password")
     if not verify_password(password, user.password):
         raise credentials_exception("Invalid email or password")
+    if not user.confirmed:
+        raise credentials_exception("User has not confirmed email")
     return user
 
 

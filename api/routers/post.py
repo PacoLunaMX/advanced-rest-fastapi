@@ -6,7 +6,6 @@ import sqlalchemy
 from fastapi import APIRouter, Depends, HTTPException
 
 from api.database import comment_table, database, like_table, post_table
-from api.model.user import User
 from api.models.post import (
     Comment,
     CommentIn,
@@ -17,6 +16,7 @@ from api.models.post import (
     UserPostWithComments,
     UserPostWithLikes,
 )
+from api.models.users import User
 from api.security import get_current_user, oauth2_scheme
 
 router = APIRouter()
@@ -63,9 +63,9 @@ async def get_all_posts(sorting: PostSorting = PostSorting.new):
 
     if sorting == PostSorting.new:
         query = select_post_and_likes.order_by(post_table.c.id.desc())
-    elif sorting == PostSorting.all:
+    elif sorting == PostSorting.old:
         query = select_post_and_likes.order_by(post_table.c.id.asc())
-    elif sorting == PostSorting.new:
+    elif sorting == PostSorting.most_likes:
         query = select_post_and_likes.order_by(sqlalchemy.desc("likes"))
 
     logger.debug(query)
@@ -115,7 +115,7 @@ async def get_post_with_comments(
 
     return {
         "post": post,
-        "comments": await get_comments_on_post(post_id),
+        "comments": await get_comments_on_post(post_id, current_user),
     }
 
 
