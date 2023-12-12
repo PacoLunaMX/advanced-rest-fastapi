@@ -18,6 +18,9 @@ class GlobalConfig(BaseConfig):
     SECRET_KEY: str
     MAILGUN_DOMAIN: Optional[str] = None
     MAILGUN_API_KEY: Optional[str] = None
+    B2_KEY_ID: Optional[str] = None
+    B2_APPLICATION_KEY: Optional[str] = None
+    B2_BUCKET_NAME: Optional[str] = None
 
 
 class DevConfig(GlobalConfig):
