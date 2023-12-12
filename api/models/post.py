@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 from pydantic_settings import SettingsConfigDict
 
@@ -9,6 +11,8 @@ class UserPostIn(BaseModel):
 class UserPost(UserPostIn):
     id: int
     user_id: int
+    image_url: Optional[str] = None
+
     model_config = SettingsConfigDict(from_attributes=True)
 
 
