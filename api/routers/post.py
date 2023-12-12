@@ -50,7 +50,7 @@ async def create_post(
     request: Request,
     prompt: str = None,
 ):
-    data = {**post.dict(), "user_id": current_user.id}
+    data = {**post.model_dump(), "user_id": current_user.id}
     query = post_table.insert().values(data)
     last_record_id = await database.execute(query)
 
@@ -97,7 +97,7 @@ async def create_comment(
     if not post:
         raise HTTPException(status_code=404, detail="Post not fund")
 
-    data = {**comment.dict(), "user_id": current_user.id}
+    data = {**comment.model_dump(), "user_id": current_user.id}
     query = comment_table.insert().values(data)
     last_record_id = await database.execute(query)
     return {**data, "id": last_record_id}
@@ -145,7 +145,7 @@ async def like_post(
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
 
-    data = {**like.dict(), "user_id": current_user.id}
+    data = {**like.model_dump(), "user_id": current_user.id}
     query = like_table.insert().values(data)
 
     logger.debug(query)
